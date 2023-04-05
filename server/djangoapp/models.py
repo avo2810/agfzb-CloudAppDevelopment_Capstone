@@ -1,60 +1,41 @@
 from django.db import models
-
-# Internal Data Stored
-class StoreRelevantDate(models.Model):
-    review_id = models.IntegerField(default=10)
+from django.utils.timezone import now
 
 
+# Create your models here.
 
-# Car Make
 class CarMake(models.Model):
-    name = models.CharField(null=False, max_length=30)
-    description = models.CharField(null=False, max_length=500)
+    name = models.CharField(null=False, max_length=50)
+    description = models.CharField(max_length=1000)
 
     def __str__(self):
-        return self.name + " " + self.description
+        return "Name: " + self.name + "," + \
+               "Description: " + self.description
 
 
-# Car Model
 class CarModel(models.Model):
-    SEDAN = 'Sedan'
-    SUW = 'SUW'
-    WAGON = 'Station Wagon'
-    COUPE = 'Coupe'
-    CONVERTIBLE = 'Convertible'
-    MINIVAN = 'Minivan'
-    CAR_TYPE_CHOICE = [
+    SEDAN = 'sedan'
+    SUV = 'suv'
+    WAGON = 'wagon'
+    CAR_TYPES = [
         (SEDAN, 'Sedan'),
-        (SUW, 'SUW'),
-        (WAGON, 'Station Wagon'),
-        (COUPE, 'Coupe'),
-        (CONVERTIBLE, 'Convertible'),
-        (MINIVAN, 'Minivan'),
+        (SUV, 'Suv'),
+        (WAGON, 'Wagon')
     ]
-    name = models.CharField(null=False, max_length=30)
+    make = models.ForeignKey(CarMake, on_delete=models.CASCADE)
+    name = models.CharField(null=False, max_length=50)
     dealer_id = models.IntegerField()
-    type = models.CharField(
-        null=False,
-        max_length=20,
-        choices=CAR_TYPE_CHOICE,
-        default=SEDAN
-    )
-    year = models.DateField(null=True)
-    car_make = models.ForeignKey(CarMake, null=True, on_delete=models.CASCADE)
+    car_type = models.CharField(max_length=50, choices=CAR_TYPES)
+    year = models.DateField()
 
     def __str__(self):
-        return self.name + " " + self.type + " " + str(self.year)
+        return "Name: " + self.name + "," + \
+                "Dealer ID: " + str(self.dealer_id) + "," + \
+               "Type: " + self.car_type + "," + \
+               "Year: " + str(self.year.year)
 
 
-# Car Dealer
 class CarDealer:
-    POSITIVE = 'positive'
-    NEGATIVE = 'negative'
-    NEUTRAL = 'neutral'
-    SENTIMENT_CHOICE = [(POSITIVE, 'positive'), (NEGATIVE, 'negative'), (NEUTRAL, 'neutral')]
-    address = models.CharField(max_length=256)
-    sentiment = models.CharField(null=False, max_length=20, choices=SENTIMENT_CHOICE, default=NEUTRAL)
-
     def __init__(self, address, city, full_name, id, lat, long, short_name, st, zip):
         # Dealer address
         self.address = address
@@ -79,20 +60,19 @@ class CarDealer:
         return "Dealer name: " + self.full_name
 
 
-# Car Review
-class CarReview:
-
-    def __init__(self, dealership, name, purchase, review, purchase_date, car_make, car_model, car_year, sentiment, id):
-        self.dealership = dealership
-        self.name = name
-        self.purchase = purchase
-        self.id = id
-        self.review = review
-        self.purchase_date = purchase_date
-        self.car_make = car_make
-        self.car_model = car_model
-        self.car_year = car_year
-        self.sentiment = sentiment
+class DealerReview:
+    def __init__(self, dealership, name, purchase, review, purchase_date, car_make, car_model, car_year,sentiment, id):
+        self.dealership=dealership
+        self.name=name
+        self.purchase=purchase
+        self.review=review
+        self.purchase_date=purchase_date
+        self.car_make=car_make
+        self.car_model=car_model
+        self.car_year=car_year
+        self.sentiment=sentiment #Watson NLU service
+        self.id=id
 
     def __str__(self):
-        return "Review : " + self.id + " " + self.purchase
+        return "Review: " + self.review +\
+                " Sentiment: " + self.sentiment
